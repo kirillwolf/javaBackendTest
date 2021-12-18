@@ -1,0 +1,67 @@
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class MiniMarketApiTest {
+
+    private static MiniMarketApiService apiService;
+    private static Gson gson;
+    private static Long id = 6L;
+
+    @BeforeAll
+    static void beforeAll() {
+        apiService = new MiniMarketApiService();
+        gson = new Gson();
+    }
+
+    @DisplayName("Check default id category")
+    @Test
+    void testGetCategoryById() throws IOException {
+        Category category = apiService.getCategory(2);
+        Assertions.assertEquals(2L, category.getId());
+        Assertions.assertEquals(4L, category.getProducts().get(0).getId());
+        Assertions.assertEquals("Samsung Watch X1000", category.getProducts().get(0).getTitle());
+        Assertions.assertEquals(20000, category.getProducts().get(0).getPrice());
+        Assertions.assertEquals("Electronic", category.getProducts().get(0).getCategoryTitle());
+        Assertions.assertEquals(5L, category.getProducts().get(1).getId());
+        Assertions.assertEquals("LG TV 1", category.getProducts().get(1).getTitle());
+        Assertions.assertEquals(50000, category.getProducts().get(1).getPrice());
+        Assertions.assertEquals("Electronic", category.getProducts().get(1).getCategoryTitle());
+        Assertions.assertEquals("Electronic", category.getTitle());
+    }
+
+    @DisplayName("Test for getting a nonexistent id")
+    @Test
+    void testGetCategoryByNonExistentId() throws IOException {
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            Category category = apiService.getCategory(100);
+        });
+    }
+
+    @DisplayName("Product List Test")
+    @Test
+    @Order(1)
+    void testGetProducts() throws IOException {
+        Type type = new TypeToken<ArrayList<Product>>() {
+        }.getType();
+        String urlSource = "C:/Users/Public/Documents/JavaProjects/java-backend-test-nov-2021/target/test-classes" +
+                "/com/geekbrains/miniMarketApiTest/testGetProducts/expected.json";
+        String json = getJsonResource(urlSource);
+        List<Product> expected = gson.fromJson(json, type);
+        List<Product> actually = apiService.getProducts();
+        Assertions.assertEquals(expected.size(), actually.size());
+        for (int i = 0; i < expected.size(); i++) {
+            assertProduct(expected.get(i), actually.get(i));
+        }
+    }
+
+    @DisplayName("Test for creating a new product")
+    @Test
+    @Order(2)
+    void testCreateProduct() throws IOException {
+        Product product = Product.builder()
+                .title("The Astrobiologists: Volume 1")
+                .price(250)
+                .categoryTitle("Food")
+                .build();
+        id = apiService.createProduct(product);
+        Product expected = apiService.getProduct(id);
+        Assertions.assertEquals(id, expected.getId());
+    }
