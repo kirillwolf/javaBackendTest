@@ -1,0 +1,58 @@
+public class Test {
+    public static void main(String[] args) {
+
+        MyBatisDbService dbService = new MyBatisDbService();
+        ProductsMapper mapper = dbService.getProductsMapper();
+        CategoriesMapper mapperForCategories = dbService.getCategoriesMapper();
+
+        //1. 3 products and 1 category
+        Categories book = new Categories();
+        book.setTitle("Book");
+        book.setId(3L);
+        mapperForCategories.insert(book);
+
+        Products book1 = new Products();
+        book1.setTitle("Something Wicked This Way Comes");
+        book1.setCategoryId(3L);
+        book1.setPrice(250);
+
+        Products book2 = new Products();
+        book2.setTitle("Tunnel in the Sky");
+        book2.setCategoryId(3L);
+        book2.setPrice(350);
+
+        Products book3 = new Products();
+        book3.setTitle("The Goblin Reservation");
+        book3.setCategoryId(3L);
+        book3.setPrice(300);
+
+        mapper.insert(book1);
+        mapper.insert(book2);
+        mapper.insert(book3);
+
+        //2. Find All Category 1 Products
+
+        ProductsExample exampleFirstCategory = new ProductsExample();
+        exampleFirstCategory.createCriteria().andCategoryIdEqualTo(1L);
+
+        List<Products> productsFromFirstCategory = mapper.selectByExample(exampleFirstCategory);
+        System.out.println(productsFromFirstCategory);
+
+
+        //3. Find all products under 1000
+
+        ProductsExample exampleLessThan1000 = new ProductsExample();
+        exampleLessThan1000.createCriteria().andPriceLessThan(1000);
+
+        List<Products> productsLessThan1000 = mapper.selectByExample(exampleLessThan1000);
+        System.out.println(productsLessThan1000);
+
+        //4.Find all products from a to h
+
+        ProductsExample exampleFromAToH = new ProductsExample();
+        exampleFromAToH.createCriteria().andTitleBetween("a", "h");
+
+        List<Products> productsFromAToH = mapper.selectByExample(exampleFromAToH);
+        System.out.println(productsFromAToH);
+    }
+}
